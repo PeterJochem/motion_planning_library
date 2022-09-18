@@ -17,31 +17,46 @@ import random
 import time
 import threading
 
+class Axis:
+    """ """
+
+    def __init__(self, vector):
+        self.vector = vector
+
+    def is_pure_roll(self) -> bool:
+        """ """
+
+        return self.vector[0] == 1
+
+    def is_pure_pitch(self) -> bool:
+        """ """
+
+        return self.vector[1] == 1
+
+    def is_pure_yaw(self) -> bool:
+        """ """
+
+        return self.vector[2] == 1
+
+
+
+
 class Transform:
+    """ """
 
     def __init__(self, parent_frame: str, child_frame: str, x: float, y: float, z: float, roll: float, pitch: float, yaw: float):
         """ """
 
-        self.transform = geometry_msgs.msg.TransformStamped()
-        self.transform.header.frame_id = parent_frame
-        self.transform.header.stamp = rospy.Time.now()
-        self.transform.child_frame_id = child_frame
-        self.transform.transform.translation.x = x
-        self.transform.transform.translation.y = y
-        self.transform.transform.translation.z = z
-
-        quaterion_as_array = self.euler_to_quaternion(roll, pitch, yaw)
+        self.parent_frame = parent_frame
+        self.child_frame = child_frame
         
-        self.transform.transform.rotation.x = quaterion_as_array[0]
-        self.transform.transform.rotation.y = quaterion_as_array[1]
-        self.transform.transform.rotation.z = quaterion_as_array[2]
-        self.transform.transform.rotation.w = quaterion_as_array[3]
-
-        print(self.transform.transform)
-
-        #self.tf_buffer = tf2_ros.Buffer()
-        #self.listener = tf2_ros.TransformListener(self.tf_buffer)
-
+        self.x = x
+        self.y = y
+        self.z = z
+        
+        self.roll = roll
+        self.pitch = pitch
+        self.yaw = yaw
 
     def euler_to_quaternion(self, roll: float, pitch: float, yaw: float):
         """ """
@@ -52,7 +67,22 @@ class Transform:
     def to_ros(self):
         """ """
 
-        return self.transform
+        transform = geometry_msgs.msg.TransformStamped()
+        transform.header.frame_id = self.parent_frame
+        transform.header.stamp = rospy.Time.now()
+        transform.child_frame_id = self.child_frame
+        transform.transform.translation.x = self.x
+        transform.transform.translation.y = self.y
+        transform.transform.translation.z = self.z
+
+        quaterion_as_array = self.euler_to_quaternion(self.roll, self.pitch, self.yaw)
+        
+        transform.transform.rotation.x = quaterion_as_array[0]
+        transform.transform.rotation.y = quaterion_as_array[1]
+        transform.transform.rotation.z = quaterion_as_array[2]
+        transform.transform.rotation.w = quaterion_as_array[3]
+
+        return transform
 
 
     def transform_pose(self, input_pose, from_frame: str, to_frame: str):
@@ -132,10 +162,6 @@ class Mesh:
 
 
 
-
-
-
-
 class Link:
     """ Describe me """
 
@@ -157,11 +183,40 @@ class Link:
 class Joint:
     """ """
 
-    def __init__(self, parent_frame: str, child_frame: str, x: float, y: float, z: float, roll: float, pitch: float, yaw: float):
+    def __init__(self, parent_frame: str, child_frame: str, x: float, y: float, z: float, roll: float, pitch: float, yaw: float, axis):
         """ """
+
+        self.parent_frame = parent_frame
+        self.child_frame = child_frame
         
+        self.x = x
+        self.y = y
+        self.z = z
+        
+        self.roll = roll
+        self.pitch = pitch
+        self.yaw = yaw
+
+
+        self.zero_angle_transform = Transform(parent_frame, child_frame, x, y, z, roll, pitch, yaw)
         self.transform = Transform(parent_frame, child_frame, x, y, z, roll, pitch, yaw)
+        self.axis = axis
+
+
+    def apply_rotation(self, radians: float):
+        """Rotate the joint frame around its axis of rotation by the number of radians """
+
+        if self.axis.is_pure_roll():
+            self.transform = Transform(self.parent_frame, self.child_frame, self.x, self.y, self.z, self.roll + radians, self.pitch, self.yaw)
         
+        elif self.axis.is_pure_pitch():
+            self.transform = Transform(self.parent_frame, self.child_frame, self.x, self.y, self.z, self.roll, self.pitch + radians, self.yaw)
+
+        elif self.axis.is_pure_yaw():
+            self.transform = Transform(self.parent_frame, self.child_frame, self.x, self.y, self.z, self.roll, self.pitch, self.yaw + radians)
+
+        else:
+            raise Exception("Cannot apply rotation since the axis of rotation is not a pure roll, pitch, or yaw.")
 
 
 
@@ -188,12 +243,21 @@ class VisualizeUR5:
         #publisher = rospy.Publisher('/visualization_marker', MarkerArray, queue_size=1)
         rate = rospy.Rate(20)
 
+        ############## This defines the robot
+        links = self.get_all_links()
+        joints = self.get_all_joints()
+        ##############
+
         i = 0
         while not rospy.is_shutdown():
             rate.sleep()
             
-            links = self.get_all_links()
-            joints = self.get_all_joints()
+            joint_angles = [i/100, i/1000, 0.5, i * 0.02, 0, 0]
+
+            #### Update robot based on the new joint angles
+            self.update_joints(joints, joint_angles)
+            ####
+            
             transforms = [link.transform.to_ros() for link in links] + [joint.transform.to_ros() for joint in joints]
             tfm = tf2_msgs.msg.TFMessage(transforms)
             self.pub_tf.publish(tfm)
@@ -205,9 +269,31 @@ class VisualizeUR5:
                     if mesh is not None and mesh.has_valid_pose():
                         array.markers.append(mesh.to_ros())
                 
+                # delete the old meshes
+                self.delete_markers()
                 self.pub_meshes.publish(array)
 
             i += 1
+
+    def delete_markers(self):
+        """ """
+
+        markerArray = MarkerArray()
+        marker = Marker()
+        marker.header.frame_id = 'world'
+        marker.action = marker.DELETEALL # send the DELETEALL marker to delete all marker in RViz
+        markerArray.markers.append(marker)
+        self.pub_meshes.publish(markerArray)
+
+
+    def update_joints(self, joints, joint_angles):
+        """ """
+
+        if joints is None or joint_angles is None or len(joint_angles) != len(joints):
+            raise Exception("Illegal input to update joints.")
+
+        for joint, joint_angle in zip(joints, joint_angles):
+            joint.apply_rotation(joint_angle)
 
 
     def callback(self, data):
@@ -293,32 +379,38 @@ class VisualizeUR5:
     def define_base_shoulder_joint(self):
         """ """
 
-        return Joint("base_link", "base_shoulder_joint", 0, 0, 0.089159, 0, 0, 0)
+        axis = Axis([0,0,1])
+        return Joint("base_link", "base_shoulder_joint", 0, 0, 0.089159, 0, 0, 0, axis)
 
     def define_shoulder_upper_arm_joint(self):
         """ """
 
-        return Joint("shoulder_link", "shoulder_upper_arm_joint", 0, 0.13585, 0, 0, math.pi/2, 0)
+        axis = Axis([0,1,0])
+        return Joint("shoulder_link", "shoulder_upper_arm_joint", 0, 0.13585, 0, 0, math.pi/2, 0, axis)
 
     def define_upper_arm_forearm_joint(self):
         """ """
 
-        return Joint("upper_arm_link", "upper_arm_forearm_joint", 0, -0.1197, 0.42500, 0, 0, 0)
+        axis = Axis([0,1,0])
+        return Joint("upper_arm_link", "upper_arm_forearm_joint", 0, -0.1197, 0.42500, 0, 0, 0, axis)
 
     def define_forearm_wrist1_joint(self):
         """ """
 
-        return Joint("forearm_link", "forearm_wrist1_joint", 0, 0, 0.39225, 0, math.pi/2, 0)
+        axis = Axis([0,1,0])
+        return Joint("forearm_link", "forearm_wrist1_joint", 0, 0, 0.39225, 0, math.pi/2, 0, axis)
 
     def define_wrist1_wrist2_joint(self):
         """ """
 
-        return Joint("wrist1_link", "wrist1_wrist2_joint", 0, 0.093, 0.0, 0, 0, 0)
+        axis = Axis([0,0,1])
+        return Joint("wrist1_link", "wrist1_wrist2_joint", 0, 0.093, 0.0, 0, 0, 0, axis)
 
     def define_wrist2_wrist3_joint(self):
         """ """
 
-        return Joint("wrist2_link", "wrist2_wrist3_joint", 0, 0.0, 0.09465, 0, 0, 0)
+        axis = Axis([0,1,0])
+        return Joint("wrist2_link", "wrist2_wrist3_joint", 0, 0.0, 0.09465, 0, 0, 0, axis)
 
     
 

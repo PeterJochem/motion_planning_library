@@ -159,7 +159,16 @@ class Mesh:
 
         return self.marker
 
+    @staticmethod
+    def create_visualization(links):
+        """ """
 
+        array = MarkerArray()
+        for link in links:
+            mesh = link.get_mesh()
+            if mesh is not None and mesh.has_valid_pose():
+                array.markers.append(mesh.to_ros())
+        return array
 
 
 class Link:
@@ -235,12 +244,9 @@ class VisualizeUR5:
 
         rospy.Subscriber("/rosout_agg", Log, self.callback)
 
-
-
         self.mesh_file_path = "/home/pj/MotionPlanning/MotionPlanning/src/mesh_files/dae"
         self.pub_tf = rospy.Publisher("/tf", tf2_msgs.msg.TFMessage, queue_size=1)
         self.pub_meshes = rospy.Publisher('/robot_meshes', MarkerArray, queue_size=1)
-        #publisher = rospy.Publisher('/visualization_marker', MarkerArray, queue_size=1)
         rate = rospy.Rate(20)
 
         ############## This defines the robot
@@ -248,34 +254,50 @@ class VisualizeUR5:
         joints = self.get_all_joints()
         ##############
 
-        i = 0
+        loop_count = 0
         while not rospy.is_shutdown():
+            
             rate.sleep()
             
-            joint_angles = [i/100, i/1000, 0.5, i * 0.02, 0, 0]
+            joint_angles = [loop_count/100, loop_count/1000, 0.5, loop_count * 0.02, 0, 0]
 
-            #### Update robot based on the new joint angles
             self.update_joints(joints, joint_angles)
-            ####
+            self.update_frames(links, joints)
+            self.update_mesh_visualization(links)
             
-            transforms = [link.transform.to_ros() for link in links] + [joint.transform.to_ros() for joint in joints]
-            tfm = tf2_msgs.msg.TFMessage(transforms)
-            self.pub_tf.publish(tfm)
+            loop_count += 1
 
-            if i > 1:
-                array = MarkerArray()
-                for link in links:
-                    mesh = link.get_mesh()
-                    if mesh is not None and mesh.has_valid_pose():
-                        array.markers.append(mesh.to_ros())
-                
-                # delete the old meshes
-                self.delete_markers()
-                self.pub_meshes.publish(array)
+    def update_mesh_visualization(self, links):
+        """ """
 
-            i += 1
+        self.delete_prior_mesh_visualization()
+        robot_visualization = Mesh.create_visualization(links)
+        self.pub_meshes.publish(robot_visualization)
 
-    def delete_markers(self):
+
+
+    def update_frames(self, links, joints):
+        """ """
+
+        transforms = [link.transform.to_ros() for link in links] + [joint.transform.to_ros() for joint in joints]
+        tfm = tf2_msgs.msg.TFMessage(transforms)
+        self.pub_tf.publish(tfm)
+
+
+    def create_mesh_visualization(self, links):
+        """ """
+        
+        array = MarkerArray()
+        for link in links:
+            mesh = link.get_mesh()
+            if mesh is not None and mesh.has_valid_pose():
+                array.markers.append(mesh.to_ros())
+
+        return array
+
+
+
+    def delete_prior_mesh_visualization(self):
         """ """
 
         markerArray = MarkerArray()

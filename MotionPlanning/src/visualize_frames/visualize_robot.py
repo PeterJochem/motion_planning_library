@@ -10,17 +10,20 @@ from tf2_geometry_msgs import PoseStamped
 from visualization_msgs.msg import MarkerArray, Marker
 from rosgraph_msgs.msg import Log
 
-
+from typing import List
 import math
-import uuid
 import random
 import time
 import threading
+from os.path import exists
 
 class Axis:
-    """ """
+    """ Represents the direction of rotation about a joint. 
 
-    def __init__(self, vector):
+        For more details, see http://wiki.ros.org/urdf/XML/joint
+     """
+
+    def __init__(self, vector: List[float]):
         self.vector = vector
 
     def is_pure_roll(self) -> bool:
@@ -37,8 +40,6 @@ class Axis:
         """ """
 
         return self.vector[2] == 1
-
-
 
 
 class Transform:
@@ -61,7 +62,6 @@ class Transform:
     def euler_to_quaternion(self, roll: float, pitch: float, yaw: float):
         """ """
 
-        # RPY to convert: 90deg, 0, -90deg
         return quaternion_from_euler(roll, pitch, yaw)
 
     def to_ros(self):
@@ -94,26 +94,15 @@ class Transform:
         pose_stamped.header.frame_id = from_frame
         pose_stamped.header.stamp = rospy.Time.now()
         return pose_stamped.pose
-
-        #########
-
-        try:
-            # ** It is important to wait for the listener to start listening. Hence the rospy.Duration(1)
-            
-            #listener.waitForTransform("/frame1", "/frame2", rospy.Time(), rospy.Duration(4.0))
-            
-            output_pose_stamped = self.tf_buffer.transform(pose_stamped, from_frame, rospy.Duration(1))
-            return output_pose_stamped.pose
-
-        except Exception as e:
-            print(e)
-            print(f"Failed to find transform from {from_frame} to {to_frame}. It's normal for this to happen occasionally.")
-            return None
+        
 
 class Mesh:
     """ """
 
     def __init__(self, mesh_file: str, parent_frame: str, transform):
+
+        if not exists(mesh_file):
+            raise Exception(f"Can not find mesh file for mesh defined in {parent_frame} frame.")
 
         self.mesh_file = mesh_file
         self.parent_frame = parent_frame
@@ -152,7 +141,7 @@ class Mesh:
     def random_id(self) -> int:
         """ """
 
-        return int(random.random() * 1000) # int(uuid.uuid1())
+        return int(random.getrandbits(31))
 
     def to_ros(self):   
         """ """
@@ -172,10 +161,20 @@ class Mesh:
 
 
 class Link:
-    """ Describe me """
 
     def __init__(self, parent_frame: str, child_frame: str, x: float, y: float, z: float, roll: float, pitch: float, yaw: float, mesh_file=None):
-        """ Describe me """
+        """ Constructor
+
+            Args:
+                parent_frame (str): Name of parent frame with which we measure the child frame
+                child_frame (str): Name of the frame which defines the link
+                x (float): X position of link in parent frame in meters
+                y (float): Y position of link in parent frame in meters
+                z (float): Z position of link in parent frame in meters
+                roll (float): Euler angle around parent's X-axis
+                pitch (float): Euler angle around parent's Y-axis
+                yaw (float): Euler angle around parent's Z-axis
+        """
 
         self.transform = Transform(parent_frame, child_frame, x, y, z, roll, pitch, yaw)
         self.mesh_file_path = mesh_file
@@ -187,13 +186,26 @@ class Link:
         return self.mesh
 
 
-
-    
 class Joint:
-    """ """
+    """ Represents a robot's joint and the movements it can undergo """
 
-    def __init__(self, parent_frame: str, child_frame: str, x: float, y: float, z: float, roll: float, pitch: float, yaw: float, axis):
-        """ """
+    def __init__(self, parent_frame: str, child_frame: str, x: float, y: float, z: float, roll: float, pitch: float,\
+     yaw: float, axis: Axis, lower_limit: float, upper_limit: float):
+        """ Constrcutor 
+        
+            Args:
+                parent_frame (str): Name of parent frame with which we measure the child frame
+                child_frame (str): Name of the frame which defines the link
+                x (float): X position of link in parent frame in meters
+                y (float): Y position of link in parent frame in meters
+                z (float): Z position of link in parent frame in meters
+                roll (float): Euler angle around parent's X-axis
+                pitch (float): Euler angle around parent's Y-axis
+                yaw (float): Euler angle around parent's Z-axis
+                axis (Axis): Axis of rotation for the joint
+                lower_limit (float): Lower joint limit
+                upper_limit (float): Upper joint limit
+        """
 
         self.parent_frame = parent_frame
         self.child_frame = child_frame
@@ -202,10 +214,12 @@ class Joint:
         self.y = y
         self.z = z
         
-        self.roll = roll
-        self.pitch = pitch
-        self.yaw = yaw
+        self.zero_angle_roll = roll
+        self.zero_angle_pitch = pitch
+        self.zero_angle_yaw = yaw
 
+        self.lower_limit = lower_limit
+        self.upper_limit = upper_limit
 
         self.zero_angle_transform = Transform(parent_frame, child_frame, x, y, z, roll, pitch, yaw)
         self.transform = Transform(parent_frame, child_frame, x, y, z, roll, pitch, yaw)
@@ -213,125 +227,58 @@ class Joint:
 
 
     def apply_rotation(self, radians: float):
-        """Rotate the joint frame around its axis of rotation by the number of radians """
+        """ Rotate the joint frame around its axis of rotation by the number of radians 
+
+            Args:
+                radians (float): The number of radians from the zero angle to rotate the joint
+        """
 
         if self.axis.is_pure_roll():
-            self.transform = Transform(self.parent_frame, self.child_frame, self.x, self.y, self.z, self.roll + radians, self.pitch, self.yaw)
+            self.transform = Transform(self.parent_frame, self.child_frame, self.x, self.y, self.z, \
+             self.zero_angle_roll + radians, self.zero_angle_pitch, self.zero_angle_yaw)
         
         elif self.axis.is_pure_pitch():
-            self.transform = Transform(self.parent_frame, self.child_frame, self.x, self.y, self.z, self.roll, self.pitch + radians, self.yaw)
+            self.transform = Transform(self.parent_frame, self.child_frame, self.x, self.y, self.z, \
+            self.zero_angle_roll, self.zero_angle_pitch + radians, self.zero_angle_yaw)
 
         elif self.axis.is_pure_yaw():
-            self.transform = Transform(self.parent_frame, self.child_frame, self.x, self.y, self.z, self.roll, self.pitch, self.yaw + radians)
+            self.transform = Transform(self.parent_frame, self.child_frame, self.x, self.y, self.z, \
+            self.zero_angle_roll, self.zero_angle_pitch, self.zero_angle_yaw + radians)
 
         else:
             raise Exception("Cannot apply rotation since the axis of rotation is not a pure roll, pitch, or yaw.")
 
 
-
-class UR5:
-    """ """
-    ...
-    # List of frame objects 
-
-
-class VisualizeUR5:
-    """ Describe me """
+class Robot:
+    """ Base class for specefic robots to inherit from """
 
     def __init__(self):
-        """ Describe me """
+        self.links = self.get_all_links()
+        self.joints = self.get_all_joints()
+        self.joint_angles = [0.0] * len(self.joints)
 
-
-        rospy.Subscriber("/rosout_agg", Log, self.callback)
-
-        self.mesh_file_path = "/home/pj/MotionPlanning/MotionPlanning/src/mesh_files/dae"
-        self.pub_tf = rospy.Publisher("/tf", tf2_msgs.msg.TFMessage, queue_size=1)
-        self.pub_meshes = rospy.Publisher('/robot_meshes', MarkerArray, queue_size=1)
-        rate = rospy.Rate(20)
-
-        ############## This defines the robot
-        links = self.get_all_links()
-        joints = self.get_all_joints()
-        ##############
-
-        loop_count = 0
-        while not rospy.is_shutdown():
-            
-            rate.sleep()
-            
-            joint_angles = [loop_count/100, loop_count/1000, 0.5, loop_count * 0.02, 0, 0]
-
-            self.update_joints(joints, joint_angles)
-            self.update_frames(links, joints)
-            self.update_mesh_visualization(links)
-            
-            loop_count += 1
-
-    def update_mesh_visualization(self, links):
-        """ """
-
-        self.delete_prior_mesh_visualization()
-        robot_visualization = Mesh.create_visualization(links)
-        self.pub_meshes.publish(robot_visualization)
-
-
-
-    def update_frames(self, links, joints):
-        """ """
-
-        transforms = [link.transform.to_ros() for link in links] + [joint.transform.to_ros() for joint in joints]
-        tfm = tf2_msgs.msg.TFMessage(transforms)
-        self.pub_tf.publish(tfm)
-
-
-    def create_mesh_visualization(self, links):
+    def set_joints(self, joint_angles: List[Joint]):
         """ """
         
-        array = MarkerArray()
-        for link in links:
-            mesh = link.get_mesh()
-            if mesh is not None and mesh.has_valid_pose():
-                array.markers.append(mesh.to_ros())
-
-        return array
-
-
-
-    def delete_prior_mesh_visualization(self):
-        """ """
-
-        markerArray = MarkerArray()
-        marker = Marker()
-        marker.header.frame_id = 'world'
-        marker.action = marker.DELETEALL # send the DELETEALL marker to delete all marker in RViz
-        markerArray.markers.append(marker)
-        self.pub_meshes.publish(markerArray)
-
-
-    def update_joints(self, joints, joint_angles):
-        """ """
-
-        if joints is None or joint_angles is None or len(joint_angles) != len(joints):
-            raise Exception("Illegal input to update joints.")
-
-        for joint, joint_angle in zip(joints, joint_angles):
+        for joint, joint_angle in zip(self.joints, joint_angles):
             joint.apply_rotation(joint_angle)
 
+    def get_transforms(self) -> List[Transform]:
+        """" """
 
-    def callback(self, data):
+        link_transforms = [link.transform for link in self.links]
+        joint_transforms = [joint.transform for joint in self.joints]
+        return link_transforms + joint_transforms
+    
 
-        print("\n\nSubscriber ran\n\n")
-
-
-    def get_meshes(self, frames):
-        ...
-
-        # Traverse the list of frames 
-        # If a mesh is defined in this frame, then update the position info
-        # 
-
-        # return list of meshes with their position info
-
+class UR5(Robot):
+    """ """
+    
+    def __init__(self):
+        self.mesh_file_path = "/home/pj/MotionPlanning/MotionPlanning/src/mesh_files/dae"
+        super().__init__()
+        
+    
 
     def define_frame(self, parent_frame: str, child_frame: str, x: float, y: float, z: float, roll: float, pitch: float, yaw: float, mesh_file=None):
         """ Describe me """
@@ -402,41 +349,39 @@ class VisualizeUR5:
         """ """
 
         axis = Axis([0,0,1])
-        return Joint("base_link", "base_shoulder_joint", 0, 0, 0.089159, 0, 0, 0, axis)
+        return Joint("base_link", "base_shoulder_joint", 0, 0, 0.089159, 0, 0, 0, axis, -2 * math.pi, 2 * math.pi)
 
     def define_shoulder_upper_arm_joint(self):
         """ """
 
         axis = Axis([0,1,0])
-        return Joint("shoulder_link", "shoulder_upper_arm_joint", 0, 0.13585, 0, 0, math.pi/2, 0, axis)
+        return Joint("shoulder_link", "shoulder_upper_arm_joint", 0, 0.13585, 0, 0, math.pi/2, 0, axis, -2 * math.pi, 2 * math.pi)
 
     def define_upper_arm_forearm_joint(self):
         """ """
 
         axis = Axis([0,1,0])
-        return Joint("upper_arm_link", "upper_arm_forearm_joint", 0, -0.1197, 0.42500, 0, 0, 0, axis)
+        return Joint("upper_arm_link", "upper_arm_forearm_joint", 0, -0.1197, 0.42500, 0, 0, 0, axis, -2 * math.pi, 2 * math.pi)
 
     def define_forearm_wrist1_joint(self):
         """ """
 
         axis = Axis([0,1,0])
-        return Joint("forearm_link", "forearm_wrist1_joint", 0, 0, 0.39225, 0, math.pi/2, 0, axis)
+        return Joint("forearm_link", "forearm_wrist1_joint", 0, 0, 0.39225, 0, math.pi/2, 0, axis, -2 * math.pi, 2 * math.pi)
 
     def define_wrist1_wrist2_joint(self):
         """ """
 
         axis = Axis([0,0,1])
-        return Joint("wrist1_link", "wrist1_wrist2_joint", 0, 0.093, 0.0, 0, 0, 0, axis)
+        return Joint("wrist1_link", "wrist1_wrist2_joint", 0, 0.093, 0.0, 0, 0, 0, axis, -2 * math.pi, 2 * math.pi)
 
     def define_wrist2_wrist3_joint(self):
         """ """
 
         axis = Axis([0,1,0])
-        return Joint("wrist2_link", "wrist2_wrist3_joint", 0, 0.0, 0.09465, 0, 0, 0, axis)
+        return Joint("wrist2_link", "wrist2_wrist3_joint", 0, 0.0, 0.09465, 0, 0, 0, axis, -2 * math.pi, 2 * math.pi)
 
     
-
-
     def get_all_joints(self):
         """ """
 
@@ -469,15 +414,99 @@ class VisualizeUR5:
     def euler_to_quaternion(self, roll: float, pitch: float, yaw: float):
         """ """
         
-        # RPY to convert: 90deg, 0, -90deg
         return quaternion_from_euler(roll, pitch, yaw)
 
 
 
+class VisualizeRobot:
+    """ Describe me """
+
+    def __init__(self, robot: Robot):
+        """ Constructor
+
+            Args:
+                robot (Robot): The robot to visualize
+        """
+
+        # Setup ROS stuff
+        self.pub_tf = rospy.Publisher("/tf", tf2_msgs.msg.TFMessage, queue_size=1)
+        self.pub_meshes = rospy.Publisher('/robot_meshes', MarkerArray, queue_size=1)
+        self.rate = rospy.Rate(20)
+        
+        self.display_robot_updates_thread = threading.Thread(target=self.display_robot_updates)
+        self.display_robot_updates_thread.start()
+
+
+    def display_robot_updates(self):
+        """ Display changes to the robot's state in RVIZ
+        
+            Target function for thread which will continously
+            update the robot model in RVIZ when there are 
+            changes to self.robot
+        """
+
+        while not rospy.is_shutdown():
+            
+            self.update_frames(robot)
+            self.update_mesh_visualization(robot)            
+            self.rate.sleep()
+    
+
+
+    def update_mesh_visualization(self, robot):
+        """ """
+
+        self.delete_prior_mesh_visualization()
+        robot_visualization = Mesh.create_visualization(robot.links)
+        self.pub_meshes.publish(robot_visualization)
+
+
+    def update_frames(self, robot):
+        """ """
+
+        transforms = robot.get_transforms() 
+        ros_transforms = [transform.to_ros() for transform in transforms]
+        tfm = tf2_msgs.msg.TFMessage(ros_transforms)
+        self.pub_tf.publish(tfm)
+
+
+    def create_mesh_visualization(self, links):
+        """ """
+        
+        array = MarkerArray()
+        for link in links:
+            mesh = link.get_mesh()
+            if mesh is not None and mesh.has_valid_pose():
+                array.markers.append(mesh.to_ros())
+
+        return array
+
+
+
+    def delete_prior_mesh_visualization(self):
+        """ """
+
+        markerArray = MarkerArray()
+        marker = Marker()
+        marker.header.frame_id = 'world'
+        marker.action = marker.DELETEALL 
+        markerArray.markers.append(marker)
+        self.pub_meshes.publish(markerArray)
+
+
 if __name__ == '__main__':
     rospy.init_node('visualize_UR5_with_TF2')
-    time.sleep(2)
-    x = threading.Thread(target=VisualizeUR5 )
-    x.start()
-    #UR5_Visualizer = VisualizeUR5()
+    time.sleep(1) # Let the node get setup
+
+    robot = UR5()
+    robot_Visualizer = VisualizeRobot(UR5)
+    
+    i = 0
+    while True:
+
+        robot.set_joints([i, 0, 0, 0, 0, 0])
+        i += 0.01
+        time.sleep(0.1)
+
+
     rospy.spin()

@@ -1,4 +1,2 @@
 cmake_minimum_required(VERSION 3.16.3)
-project(FCL_Conversions)
-
-#set(CMAKE_CXX_STANDARD 11)
+project(fcl_conversions)

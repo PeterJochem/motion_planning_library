@@ -1,17 +1,19 @@
 include_directories(include)
-#find_package(geometry)
-
 
 add_library(robot
             src/robot.cpp 
             src/UR5.cpp
             src/joint.cpp 
             src/link.cpp
-            #src/settings.cpp
             )
 
+#find_package(Geometry)
+#include_directories(${geometry_INCLUDE_DIRS}
+if(NOT DEFINED ${geometry_INCLUDE_DIRS})
+  set(geometry_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/../geometry/include/" CACHE INTERNAL "")
+endif(NOT DEFINED ${geometry_INCLUDE_DIRS})
 
-include_directories(../geometry/include)
+include_directories(${geometry_INCLUDE_DIRS})
 target_link_libraries(robot PUBLIC geometry)
 
 set(BUILD_TESTS True)

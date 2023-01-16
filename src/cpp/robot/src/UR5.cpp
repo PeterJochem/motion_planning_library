@@ -32,7 +32,7 @@ namespace Robot {
         std::string visual_mesh_file = "";
         std::string collision_mesh_file = "";
 
-        geometry::Transform root_to_base = geometry::Transform(ROOT_FRAME_NAME, link_name, 1, 0, 0, 0, 0, 0);
+        geometry::Transform root_to_base = geometry::Transform(ROOT_FRAME_NAME, link_name, 1., 0., 0., 0., 0., 0.);
         return Robot::Link(root_to_base, visual_mesh_file, collision_mesh_file);
     }
 

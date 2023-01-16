@@ -5,7 +5,6 @@ namespace Robot {
 
     Joint::Joint(geometry::Transform transform, geometry::Axis axis): transform(transform), axis(axis) {
         zero_angle_transform = transform;
-
     }
 
     geometry::Transform Joint::get_transform() {
@@ -47,20 +46,23 @@ namespace Robot {
         double y = transform.get_y();
         double z = transform.get_z();
 
+        GiNaC::symbol angle(name());
+        this->joint_symbol = angle;
+
         if (axis.is_pure_roll()) {
 
-            GiNaC::symbol roll(name());
-            return geometry::SymbolicTransform(x, y, z, roll, transform.get_pitch(), transform.get_yaw());
+            auto R = angle + zero_angle_transform.get_roll();
+            return geometry::SymbolicTransform(x, y, z, R, transform.get_pitch(), transform.get_yaw());
         }
         else if (axis.is_pure_pitch()) {
 
-            GiNaC::symbol pitch(name());
-            return geometry::SymbolicTransform(x, y, z, transform.get_roll(), pitch, transform.get_yaw());
+            auto R = angle + zero_angle_transform.get_pitch();
+            return geometry::SymbolicTransform(x, y, z, transform.get_roll(), R, transform.get_yaw());
         }
         else if (axis.is_pure_yaw()) {
 
-            GiNaC::symbol yaw(name());
-            return geometry::SymbolicTransform(x, y, z, transform.get_roll(), transform.get_pitch(), yaw);
+            auto R = angle + zero_angle_transform.get_yaw();
+            return geometry::SymbolicTransform(x, y, z, transform.get_roll(), transform.get_pitch(), R);
         }
         
 

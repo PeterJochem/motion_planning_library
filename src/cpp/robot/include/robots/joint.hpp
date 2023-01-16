@@ -16,6 +16,8 @@ namespace Robot {
             void apply_rotation(float radians);
             geometry::SymbolicTransform symbolic_transform();
             std::string name();
+            GiNaC::symbol joint_symbol;
+            
 
         private:
             geometry::SymbolicTransform define_symbolic_transform();

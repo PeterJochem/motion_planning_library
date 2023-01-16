@@ -5,9 +5,3 @@ project(motion_planning_library)
 
 add_subdirectory(src/cpp)
 
-#add_executable(visually_inspect_transform_tree visually_inspect_static_transform_tree.cpp)
-
-#target_link_libraries(
-#    visually_inspect_transform_tree
-#    geometry
-#)

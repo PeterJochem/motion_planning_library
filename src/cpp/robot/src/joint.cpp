@@ -36,4 +36,35 @@ namespace Robot {
         angle = radians;
     }
 
+    std::string Joint::name() {
+
+        return transform.get_parent().get_name() + "->" + transform.get_child().get_name();
+    }
+
+    geometry::SymbolicTransform Joint::symbolic_transform() {
+
+        double x = transform.get_x();
+        double y = transform.get_y();
+        double z = transform.get_z();
+
+        if (axis.is_pure_roll()) {
+
+            GiNaC::symbol roll(name());
+            return geometry::SymbolicTransform(x, y, z, roll, transform.get_pitch(), transform.get_yaw());
+        }
+        else if (axis.is_pure_pitch()) {
+
+            GiNaC::symbol pitch(name());
+            return geometry::SymbolicTransform(x, y, z, transform.get_roll(), pitch, transform.get_yaw());
+        }
+        else if (axis.is_pure_yaw()) {
+
+            GiNaC::symbol yaw(name());
+            return geometry::SymbolicTransform(x, y, z, transform.get_roll(), transform.get_pitch(), yaw);
+        }
+        
+
+        throw std::runtime_error("The axis must be a pure roll, pitch, or yaw.");
+    }
+
 }

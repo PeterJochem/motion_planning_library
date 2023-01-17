@@ -6,7 +6,6 @@ namespace Robot {
 
 
     Robot1::Robot1() {
-        ;
     }
 
     
@@ -15,10 +14,9 @@ namespace Robot {
         geometry::Frame parent = ordered_transforms[0].get_parent();
         geometry::Frame child = ordered_transforms[ordered_transforms.size() - 1].get_child();
 
-        
-        geometry::SymbolicTransform result = ordered_symbolic_transforms[0];
+        geometry::SymbolicTransform product = ordered_symbolic_transforms[0];
         for (int i = 1; i < ordered_symbolic_transforms.size(); i++) {
-            result = result * ordered_symbolic_transforms[i];
+            product = product * ordered_symbolic_transforms[i];
         }
 
         GiNaC::exmap map;
@@ -26,24 +24,24 @@ namespace Robot {
             map[joints[i].joint_symbol] = angles[i];
         }
 
-        auto result2 = GiNaC::evalf(result.matrix.subs(map));
-        return geometry::conversions::convert_to_transform(parent, child, result2);
+        auto result = GiNaC::evalf(product.matrix.subs(map));
+        return geometry::conversions::convert_to_transform(parent, child, result);
     }
 
     Eigen::MatrixXd Robot1::jacobian(std::vector<float> current_angles) {
 
         geometry::Transform current_transform = forward_kinematics(current_angles);
         float delta = 0.0012;
-        Eigen::MatrixXd result(6, 6);
+        Eigen::MatrixXd result(6, joints.size());
 
         // Compute the derivatives of x.
         for (int i = 0; i < joints.size(); i++) {
 
             current_angles[i] = current_angles[i] + delta;
             float nudged_value = forward_kinematics(current_angles).get_x();
-            float dx_derivative = (current_transform.get_x() - nudged_value) / delta;
+            float derivative = (current_transform.get_x() - nudged_value) / delta;
 
-            result(i, 0) = dx_derivative;
+            result(i, 0) = derivative;
 
             current_angles[i] -= delta; // Undo the addition above.
         }
@@ -53,9 +51,9 @@ namespace Robot {
 
             current_angles[i] += delta;
             float nudged_value = forward_kinematics(current_angles).get_y();
-            float dy_derivative = (current_transform.get_y() - nudged_value)/delta;
+            float derivative = (current_transform.get_y() - nudged_value)/delta;
 
-            result(i, 1) = dy_derivative;
+            result(i, 1) = derivative;
 
             current_angles[i] -= delta; // Undo the addition above.
         }
@@ -65,9 +63,9 @@ namespace Robot {
 
             current_angles[i] += delta;
             float nudged_value = forward_kinematics(current_angles).get_z();
-            float dz_derivative = (current_transform.get_z() - nudged_value)/delta;
+            float derivative = (current_transform.get_z() - nudged_value)/delta;
 
-            result(i, 2) = dz_derivative;
+            result(i, 2) = derivative;
 
             current_angles[i] -= delta; // Undo the addition above.
         }
@@ -77,9 +75,9 @@ namespace Robot {
             
             current_angles[i] = current_angles[i] + delta;
             float nudged_value = forward_kinematics(current_angles).get_roll();
-            float droll_derivative = (current_transform.get_roll() - nudged_value)/delta;
+            float derivative = (current_transform.get_roll() - nudged_value)/delta;
 
-            result(i, 3) = droll_derivative + 0.0001;
+            result(i, 3) = derivative + 0.0001;
             
             current_angles[i] = current_angles[i] - delta; // Undo the addition above.
         }
@@ -89,9 +87,9 @@ namespace Robot {
 
             current_angles[i] += delta;
             float nudged_value = forward_kinematics(current_angles).get_pitch();
-            float dpitch_derivative = (current_transform.get_pitch() - nudged_value)/delta;
+            float derivative = (current_transform.get_pitch() - nudged_value)/delta;
 
-            result(i, 4) = dpitch_derivative;
+            result(i, 4) = derivative;
 
             current_angles[i] -= delta; // Undo the addition above.
         }
@@ -101,9 +99,9 @@ namespace Robot {
 
             current_angles[i] += delta;
             float nudged_value = forward_kinematics(current_angles).get_yaw();
-            float dyaw_derivative = (current_transform.get_yaw() - nudged_value)/delta;
+            float derivative = (current_transform.get_yaw() - nudged_value)/delta;
 
-            result(i, 5) = dyaw_derivative;
+            result(i, 5) = derivative;
 
             current_angles[i] -= delta; // Undo the addition above.
         }
@@ -111,21 +109,22 @@ namespace Robot {
         return result;
     }
 
-    std::vector<float> Robot1::inverse_kinematics(geometry::Transform goal) {
-                
-        float tolerance = 0.001;
-        float max_iteration = 1000;
-        float error = 10000000.0;
-        std::vector<float> current_angles =  {-1.5, 2, 1.3, -0.4, 1.4, 0.4};
-        geometry::Transform current_transform = forward_kinematics(current_angles);
-
+    /** Finds a set of joint angles which make the robot's end effector have the given trnsform. 
+     *  Implemnts the Newton-Raphson method for non-linear root finding as described in the link below.
+     *      hades.mech.northwestern.edu/images/7/7f/MR.pdf
+    **/
+    std::vector<float>  Robot1::inverse_kinematics(geometry::Transform goal, std::vector<float> joint_angles, int max_iterations, float tolerance) {
+        
         int iteration = 0;
-        while (error > tolerance && iteration < max_iteration) {
+        auto current_transform = forward_kinematics(joint_angles);
+        float error = utilities::sum_square_error(current_transform.matrix, goal.matrix);
 
-            auto jacobian_matrix = jacobian(current_angles);
+        while (error > tolerance && iteration < max_iterations) {
+
+            auto jacobian_matrix = jacobian(joint_angles);
 
             auto inverse_jacobian = jacobian_matrix.transpose().inverse();
-            //((jacobian_matrix.transpose() * jacobian_matrix).inverse()) * jacobian_matrix.transpose();
+            //Pseucoinverse - ((jacobian_matrix.transpose() * jacobian_matrix).inverse()) * jacobian_matrix.transpose();
            
             Eigen::MatrixXd goal_pose(6, 1);
             Eigen::MatrixXd current_pose(6, 1);
@@ -136,19 +135,26 @@ namespace Robot {
             auto[x2, y2, z2, roll2, pitch2, yaw2] = utilities::to_pose_vector(current_transform.matrix);
             current_pose << x2, y2, z2, roll2, pitch2, yaw2;
 
-            auto delta_transform = goal_pose - current_pose;
-            auto delta_theta = inverse_jacobian * delta_transform;
+            auto delta_theta = inverse_jacobian * (goal_pose - current_pose);
 
-            for (int i = 0; i < current_angles.size(); i++) {
-                current_angles[i] -= (delta_theta(i, 0)) * 1.; //0.05;
+            for (int i = 0; i < joint_angles.size(); i++) {
+                joint_angles[i] -= (delta_theta(i, 0)) * 1.;
             }
 
-            current_transform = forward_kinematics(current_angles);
+            current_transform = forward_kinematics(joint_angles);
             error = utilities::sum_square_error(current_transform.matrix, goal.matrix);
             iteration += 1;
             std::cout << "Error: " << error << std::endl;
         }
 
-        return current_angles;
+        return joint_angles;
     }
+
+    std::vector<float> Robot1::inverse_kinematics(geometry::Transform goal) {
+                
+        float tolerance = 0.001;
+        float max_iterations = 1000;
+        std::vector<float> start_angles =  {-1.5, 2, 1.3, -0.4, 1.4, 0.4};
+        return inverse_kinematics(goal, start_angles, max_iterations, tolerance);
+    }       
 }

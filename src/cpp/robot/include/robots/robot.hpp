@@ -22,13 +22,10 @@ class Robot1 {
         std::vector<float> random_joint_angles();
         // random_legal_joint_angles
 
-        //Transform forward_kinematics(std::vector<Joint> joints);
         inline Eigen::MatrixXd jacobian(std::vector<float> angles);
         std::vector<float> inverse_kinematics(geometry::Transform);
         geometry::Transform forward_kinematics(std::vector<float>& angles);
-        // jacobian();
-        // inverse jacobian
-        //inverse_kinematics();
+
 
 
 
@@ -37,8 +34,7 @@ class Robot1 {
         std::vector<Joint> joints;
         std::vector<geometry::SymbolicTransform> ordered_symbolic_transforms;
         std::vector<geometry::Transform> ordered_transforms;
-
-        
+        std::vector<float> inverse_kinematics(geometry::Transform, std::vector<float> joint_angles, int max_iterations, float tolerance);
 
     private:
         // base_to_world_transform Transform

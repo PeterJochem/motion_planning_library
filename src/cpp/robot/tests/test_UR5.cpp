@@ -33,78 +33,51 @@ TEST(UR5_5_Suite, test_forward_kinematics2) {
 TEST(UR5_5_Suite, test_jacobian) {
 
     Robot::UR_5 robot = Robot::UR_5();
-    using namespace std::chrono;
-
-    auto start = high_resolution_clock::now();
-    auto transform = robot.jacobian({1., 2., 0., 0., 0.5, 2.5});
-    auto end = high_resolution_clock::now();
-
+    auto jacobian_matrix = robot.jacobian({1., 2., 0., 0., 0.5, 2.5});
     
-    std::cout << "Computing the jacobian took: " << duration_cast<microseconds>(end - start).count() << " microseconds" << std::endl;
+    Eigen::MatrixXd expected = Eigen::MatrixXd(6,6);
+    expected << -0.299513, 0.322734, 0, 0.0001, 0.988692, -0.155469, 
+    0.380327, 0.592271, -0.426769, 0.0001, -0.0806401, -0.554919,
+    0.171612, 0.267203, -0.249694, 0.0001, -0.0806401, -0.554919, 
+    -0.0210603, -0.0328571, -0.0862777, 0.0001, -0.0806401, 
+    -0.554919, -0.000198682, 0.000546376, 0.000794729, 0.0001, 0.525887,
+    0.721117, 4.96705e-05, -2.48353e-05, 0 , 0.0001, -0.476787, -0.246962;
 
-    /*
-    Eigen::Matrix4d expected;
-    expected << 0.459144, -0.846257, 0.270252, 0.677051, 0.530389, 0.505179, 0.680795, -0.299322, -0.712653, -0.169245, 0.680795, -0.615012, 0, 0, 0, 1;
-    auto expected_transform = geometry::Transform(transform.get_parent(), transform.get_child(), expected);
-
-    EXPECT_EQ(transform, expected_transform);
-    */
+    EXPECT_TRUE(jacobian_matrix.isApprox(expected, 0.01));
 }
 
-TEST(UR5_5_Suite, test_inverse_kinematics) {
+TEST(UR5_5_Suite, test_inverse_kinematics1) {
 
     Robot::UR_5 robot = Robot::UR_5();
-    using namespace std::chrono;
 
-    std::vector<float> joint_angles = {-1.5, 0.001, -1.5, 1.5, 2.511, -0.01};  //{1.5, 0.5, 0.5, 0.5, 2.5, -1.14};
+    std::vector<float> joint_angles = {-1.5, 0.001, -1.5, 1.5, 2.511, -0.01};
     geometry::Transform goal = robot.forward_kinematics(joint_angles);
 
-    auto start = high_resolution_clock::now();
     auto result_joint_angles = robot.inverse_kinematics(goal);
     auto result_transform = robot.forward_kinematics(result_joint_angles);
 
-    auto end = high_resolution_clock::now();
-
-    //EXPECT_EQ(goal.get_x(), result_transform.get_x());
     EXPECT_NEAR(goal.get_x(), result_transform.get_x(), 0.001);
     EXPECT_NEAR(goal.get_y(), result_transform.get_y(), 0.001);
     EXPECT_NEAR(goal.get_z(), result_transform.get_z(), 0.001);
     EXPECT_NEAR(goal.get_roll(), result_transform.get_roll(), 0.001);
     EXPECT_NEAR(goal.get_pitch(), result_transform.get_pitch(), 0.001);
     EXPECT_NEAR(goal.get_yaw(), result_transform.get_yaw(), 0.001);
-
-    std::cout << "Computing the inverse kinematics took: " << duration_cast<seconds>(end - start).count() << " seconds" << std::endl;
-
-    /*
-    Eigen::Matrix4d expected;
-    expected << 0.459144, -0.846257, 0.270252, 0.677051, 0.530389, 0.505179, 0.680795, -0.299322, -0.712653, -0.169245, 0.680795, -0.615012, 0, 0, 0, 1;
-    auto expected_transform = geometry::Transform(transform.get_parent(), transform.get_child(), expected);
-
-    EXPECT_EQ(transform, expected_transform);
-    */
 }
 
 TEST(UR5_5_Suite, test_inverse_kinematics2) {
 
     Robot::UR_5 robot = Robot::UR_5();
-    using namespace std::chrono;
 
     std::vector<float> joint_angles = {1.5, 0.5, 0.5, 0.5, 2.5, -1.14};
     geometry::Transform goal = robot.forward_kinematics(joint_angles);
 
-    auto start = high_resolution_clock::now();
     auto result_joint_angles = robot.inverse_kinematics(goal);
     auto result_transform = robot.forward_kinematics(result_joint_angles);
 
-    auto end = high_resolution_clock::now();
-
-    //EXPECT_EQ(goal.get_x(), result_transform.get_x());
     EXPECT_NEAR(goal.get_x(), result_transform.get_x(), 0.001);
     EXPECT_NEAR(goal.get_y(), result_transform.get_y(), 0.001);
     EXPECT_NEAR(goal.get_z(), result_transform.get_z(), 0.001);
     EXPECT_NEAR(goal.get_roll(), result_transform.get_roll(), 0.001);
     EXPECT_NEAR(goal.get_pitch(), result_transform.get_pitch(), 0.001);
     EXPECT_NEAR(goal.get_yaw(), result_transform.get_yaw(), 0.001);
-
-    std::cout << "Computing the inverse kinematics took: " << duration_cast<seconds>(end - start).count() << " seconds" << std::endl;
 }

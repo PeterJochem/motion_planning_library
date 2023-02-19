@@ -17,6 +17,10 @@ namespace Robot  {
         public:
             UR_5();
 
+            std::vector<geometry::Transform> get_ordered_transforms() override;
+            //std::vector<Link*> get_links() override;
+            //std::vector<Joint*> get_joints() override;
+
         private:
             Robot::Link define_base_link();
             Robot::Link define_shoulder_link();

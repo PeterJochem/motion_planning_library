@@ -7,8 +7,8 @@ namespace Robot {
         zero_angle_transform = transform;
     }
 
-    geometry::Transform Joint::get_transform() {
-        return transform;
+    geometry::Transform* Joint::get_transform() {
+        return &transform;
     }
 
     void Joint::apply_rotation(float radians) {

@@ -12,7 +12,7 @@ namespace Robot {
 
         public:
             Joint(geometry::Transform, geometry::Axis);
-            geometry::Transform get_transform();
+            geometry::Transform* get_transform();
             void apply_rotation(float radians);
             geometry::SymbolicTransform symbolic_transform();
             std::string name();

@@ -1,14 +1,20 @@
 #include "robots/link.hpp"
 
-
 namespace Robot {
 
 
-    Link::Link(geometry::Transform transform, std::string visual_mesh_file_name, std::string collision_mesh_file_name): transform(transform) {
+    Link::Link(geometry::Transform transform, geometry::VisualMesh visual_mesh, std::string collision_mesh_file_name): transform(transform), visual_mesh(visual_mesh) {
+
+        // mesh = 
+        std::cout << visual_mesh.get_file_name() << std::endl;
+    
     }
 
-    geometry::Transform Link::get_transform() {
-        return transform;
+    //geometry::Mesh Link::load_mesh() {
+    //}
+
+    geometry::Transform* Link::get_transform() {
+        return &transform;
     }
 
     geometry::SymbolicTransform Link::symbolic_transform() {
@@ -20,6 +26,10 @@ namespace Robot {
         double pitch = transform.get_pitch();
         double yaw = transform.get_yaw();
         return geometry::SymbolicTransform(x, y, z, roll, pitch, yaw);
+    }
+
+    geometry::VisualMesh Link::get_visual_mesh() {
+        return visual_mesh;
     }
 
 }

@@ -11,8 +11,8 @@ namespace Robot {
     
     geometry::Transform Robot1::forward_kinematics(std::vector<float>& angles) {
 
-        geometry::Frame parent = ordered_transforms[0].get_parent();
-        geometry::Frame child = ordered_transforms[ordered_transforms.size() - 1].get_child();
+        geometry::Frame parent = ordered_transforms[0]->get_parent();
+        geometry::Frame child = ordered_transforms[ordered_transforms.size() - 1]->get_child();
 
         geometry::SymbolicTransform product = ordered_symbolic_transforms[0];
         for (int i = 1; i < ordered_symbolic_transforms.size(); i++) {
@@ -26,6 +26,15 @@ namespace Robot {
 
         auto result = GiNaC::evalf(product.matrix.subs(map));
         return geometry::conversions::convert_to_transform(parent, child, result);
+    }
+
+    void Robot1::set_joint_angles(std::vector<float> angles) {
+
+        // Error Check here
+        for (int i = 0; i < angles.size(); i++) {
+            joints[i].apply_rotation(angles[i]);
+        }
+
     }
 
     Eigen::MatrixXd Robot1::jacobian(std::vector<float> current_angles) {
@@ -156,5 +165,11 @@ namespace Robot {
         float max_iterations = 1000;
         std::vector<float> start_angles =  {-1.5, 2, 1.3, -0.4, 1.4, 0.4};
         return inverse_kinematics(goal, start_angles, max_iterations, tolerance);
-    }       
+    }
+
+    std::vector<Robot::Link> Robot1::get_links() {
+        return links;
+    }
+
+    
 }

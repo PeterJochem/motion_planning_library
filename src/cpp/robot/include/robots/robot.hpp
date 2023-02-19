@@ -5,6 +5,7 @@
 //#include "robots/settings.hpp"
 #include "transform/transform.hpp"
 #include "transform/symbolic_transform.hpp"
+#include "meshes/mesh.hpp"
 #include <vector>
 
 
@@ -25,15 +26,21 @@ class Robot1 {
         inline Eigen::MatrixXd jacobian(std::vector<float> angles);
         std::vector<float> inverse_kinematics(geometry::Transform);
         geometry::Transform forward_kinematics(std::vector<float>& angles);
+        
+        virtual std::vector<geometry::Transform> get_ordered_transforms() = 0;
+        //virtual std::vector<Link*> get_links() = 0;
+        //virtual std::vector<Joint*> get_joints() = 0;
 
 
+        void set_joint_angles(std::vector<float> angles);
+        std::vector<Robot::Link> get_links();
 
 
     protected:
         std::vector<Link> links;
         std::vector<Joint> joints;
         std::vector<geometry::SymbolicTransform> ordered_symbolic_transforms;
-        std::vector<geometry::Transform> ordered_transforms;
+        std::vector<geometry::Transform*> ordered_transforms;
         std::vector<float> inverse_kinematics(geometry::Transform, std::vector<float> joint_angles, int max_iterations, float tolerance);
 
     private:

@@ -5,8 +5,8 @@
 #include "robots/joint.hpp"
 #include "transform/transform.hpp"
 #include "transform/symbolic_transform.hpp"
-
 #include "robots/settings.hpp"
+#include "meshes/stl_parser.hpp"
 
 #include <math.h>
 

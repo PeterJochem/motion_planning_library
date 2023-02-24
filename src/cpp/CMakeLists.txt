@@ -3,4 +3,8 @@ project(motion_planning_library)
 #set(CMAKE_CXX_STANDARD 11)
 add_subdirectory(robot)
 add_subdirectory(geometry)
+include_directories(geometry/src/stl_parser)
+include_directories(/home/pj/ros_motion_planning/src/motion_planning_library/src/cpp/robot/include/robots)
+
+add_subdirectory(collision_checking)
 add_subdirectory(fcl_conversions)

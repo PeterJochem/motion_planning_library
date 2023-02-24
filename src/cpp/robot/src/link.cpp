@@ -3,7 +3,7 @@
 namespace Robot {
 
 
-    Link::Link(geometry::Transform transform, geometry::VisualMesh visual_mesh, std::string collision_mesh_file_name): transform(transform), visual_mesh(visual_mesh) {
+    Link::Link(geometry::Transform transform, geometry::VisualMesh visual_mesh, geometry::CollisionMesh collision_mesh): transform(transform), visual_mesh(visual_mesh), collision_mesh(collision_mesh) {
 
         // mesh = 
         std::cout << visual_mesh.get_file_name() << std::endl;
@@ -30,6 +30,14 @@ namespace Robot {
 
     geometry::VisualMesh Link::get_visual_mesh() {
         return visual_mesh;
+    }
+
+    std::string Link::get_name() {
+        return transform.get_child().get_name();
+    }
+
+    geometry::CollisionMesh Link::get_collision_mesh() {
+        return collision_mesh;
     }
 
 }

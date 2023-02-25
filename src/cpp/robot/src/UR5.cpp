@@ -12,8 +12,8 @@ namespace Robot {
             ordered_symbolic_transforms.push_back(joints[i].symbolic_transform()); 
             ordered_transforms.push_back(links[i].get_transform());
             ordered_transforms.push_back(joints[i].get_transform());
-        
         }
+
         ordered_symbolic_transforms.push_back(links[links.size() - 1].symbolic_transform()  );
         ordered_transforms.push_back(links[links.size() - 1].get_transform());
     }

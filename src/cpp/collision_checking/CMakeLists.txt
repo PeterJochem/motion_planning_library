@@ -7,7 +7,7 @@ find_package(GTest REQUIRED)
 find_package(fcl REQUIRED)
 find_package(Eigen3 3.3 REQUIRED)
 
-include_directories(/home/pj/ros_motion_planning/src/motion_planning_library/src/cpp/robot/include/robots)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../robot/include/)
 
 add_library(collision_checking
   src/collision_checker.cpp
@@ -16,7 +16,7 @@ add_library(collision_checking
   src/conversions.cpp
 )
 
-target_include_directories(collision_checking PUBLIC ${FCL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} /home/pj/ros_motion_planning/src/motion_planning_library/src/cpp/robot/include/robots)
+target_include_directories(collision_checking PUBLIC ${FCL_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../robot/include/)
 target_link_libraries(collision_checking PUBLIC Eigen3::Eigen fcl robot)
 
 set(BUILD_TESTS True)

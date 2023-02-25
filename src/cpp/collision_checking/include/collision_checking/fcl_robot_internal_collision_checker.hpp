@@ -24,8 +24,9 @@ class FCLRobotInternalCollisionChecker: public RobotInternalCollisionChecker {
     private:
         bool check(Model&, geometry::Transform&, Model&, geometry::Transform&);
         bool check(CollisionObjectf*, CollisionObjectf*);
-        CollisionObjectf create_collision_object(std::shared_ptr<Model>, geometry::Transform);
+        CollisionObjectf* create_collision_object(std::shared_ptr<Model>, geometry::Transform);
         std::map<std::string, std::shared_ptr<Model>> fcl_models;
+        std::map<std::string, CollisionObjectf*> fcl_collision_objects;
         std::shared_ptr<Model> to_fcl(Robot::Link);
         Robot::Robot1& robot;
         geometry::TransformTree* transform_tree;

@@ -7,7 +7,11 @@
 #include "fcl/narrowphase/detail/gjk_solver_libccd.h"
 #include "fcl/narrowphase/detail/traversal/collision_node.h"
 #include "fcl/narrowphase/continuous_collision.h"
+#include "robots/robot.hpp"
 #include <vector>
+
+using namespace fcl;
+typedef BVHModel<OBBRSSf> Model;
 
 namespace conversions {
 
@@ -18,6 +22,5 @@ namespace conversions {
     fcl::Triangle to_fcl(std::tuple<int, int, int>);
 
     fcl::Transform3f to_fcl(geometry::Transform, geometry::TransformTree*);
-
-
+    std::shared_ptr<Model> to_fcl(Robot::Link link);
 }

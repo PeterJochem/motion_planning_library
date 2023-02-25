@@ -66,4 +66,18 @@ namespace conversions {
    
         return pose;    
     }
+
+    std::shared_ptr<Model> to_fcl(Robot::Link link) {
+
+        auto collision_mesh = link.get_collision_mesh();
+        auto vertices = conversions::to_fcl(collision_mesh.get_vertices());
+        auto triangles = conversions::to_fcl(collision_mesh.get_triangles());
+
+        std::shared_ptr<Model> geom = std::make_shared<Model>();
+        geom->beginModel();
+        geom->addSubModel(vertices, triangles);
+        geom->endModel();
+        
+        return geom;
+    }
 }

@@ -28,7 +28,6 @@ namespace Robot {
         }
 
         transforms.push_back(*links[links.size() - 1].get_transform());
-
         return transforms;
     }
     
@@ -48,7 +47,6 @@ namespace Robot {
     }
 
     Robot::Link UR_5::define_shoulder_link() {
-
 
         std::string link_name = "shoulder_link";
         std::string visual_mesh_file = MESH_FILE_PATH_DIRECTORY + "shoulder.dae";

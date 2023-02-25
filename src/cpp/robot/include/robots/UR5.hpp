@@ -46,8 +46,6 @@ namespace Robot  {
             // get_end_effector_transform
             // get_transforms_in_order
             std::string MESH_FILE_PATH_DIRECTORY = std::string(__FILE__).substr(0, std::string(__FILE__).rfind("/")) + std::string("/../../../../mesh_files/UR5/");
-
-
    };
 }
 #endif

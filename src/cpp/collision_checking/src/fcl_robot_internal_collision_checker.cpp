@@ -1,5 +1,5 @@
 #include "collision_checking/fcl_robot_internal_collision_checker.hpp"
-
+#include <ctime>
 
 FCLRobotInternalCollisionChecker::FCLRobotInternalCollisionChecker(Robot::Robot1& robot, geometry::TransformTree* transform_tree): robot(robot), transform_tree(transform_tree) {
 
@@ -24,6 +24,8 @@ CollisionObjectf* FCLRobotInternalCollisionChecker::create_collision_object(std:
 bool FCLRobotInternalCollisionChecker::check() {
     
     auto links = robot.get_links();
+
+    auto start = time(0);
 
     // Update all the transforms for each collision object.
     for (int i = 0; i < links.size(); i++) {
@@ -53,6 +55,9 @@ bool FCLRobotInternalCollisionChecker::check() {
             }
         }
     }
+
+    auto end = time(0);
+    std::cout << "Time spent checking: " << end - start << " seconds" << std::endl;
 
     return false;
 }

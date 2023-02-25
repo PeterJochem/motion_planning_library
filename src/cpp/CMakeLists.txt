@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.16.3)
 project(motion_planning_library)
-#set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 add_subdirectory(robot)
 add_subdirectory(geometry)
 include_directories(geometry/src/stl_parser)
-include_directories(/home/pj/ros_motion_planning/src/motion_planning_library/src/cpp/robot/include/robots)
+include_directories(/home/pj/ros_motion_planning/src/motion_planning_library/src/cpp/robot/include)
 
 add_subdirectory(collision_checking)
 add_subdirectory(fcl_conversions)

@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.16.3)
 project(CollisonChecking)
-
-#set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 
 include_directories(include)
 find_package(GTest REQUIRED)

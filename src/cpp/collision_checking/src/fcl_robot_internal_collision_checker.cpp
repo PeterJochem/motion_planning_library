@@ -23,14 +23,7 @@ CollisionObjectf FCLRobotInternalCollisionChecker::create_collision_object(std::
 
 bool FCLRobotInternalCollisionChecker::check() {
     
-    auto links = robot.get_links();
-
-    /*
-    auto A = *(links[links.size() - 1].get_transform());
-    auto B = transform_tree->measure_transform(geometry::Frame("world"), A.get_child());
-    std::cout << B << std::endl;
-    */
-
+    auto links = robot.get_links();                                  
     for (int i = 0; i < links.size(); i++) {
 
         auto link1_name = links[i].get_name();

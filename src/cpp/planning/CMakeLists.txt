@@ -9,9 +9,14 @@ include_directories(${GTEST_INCLUDE_DIRS})
 add_library(planning
   src/path.cpp 
   src/trajectory.cpp
+  src/robot_state.cpp 
+  src/joint_state.cpp 
+  src/pose_state.cpp 
+  src/robot_state_collection.cpp
+  src/time_scaler.cpp
 )
 
-target_include_directories(planning PUBLIC ${EIGEN3_INCLUDE_DIR} ./include)
+target_include_directories(planning PUBLIC ./include)
 target_link_libraries(planning PUBLIC robot geometry)
 
 set(BUILD_TESTS True)

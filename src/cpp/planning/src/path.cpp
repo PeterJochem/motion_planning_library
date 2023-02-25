@@ -1,5 +1,8 @@
 #include "planning/path.hpp"
 
-Path::Path() {
+namespace planning {
 
+    Path::Path() {
+
+    }
 }

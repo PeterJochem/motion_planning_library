@@ -6,7 +6,11 @@ namespace planning {
 
     }
 
-    std::vector<float> JointState::configuration() {
-        return {};
+    JointState::JointState(std::vector<float> configuration): configuration(configuration)  {
+
+    }
+
+    std::vector<float> JointState::get_configuration() {
+        return configuration;
     }
 }

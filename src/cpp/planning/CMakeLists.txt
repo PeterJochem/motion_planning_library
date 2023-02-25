@@ -16,7 +16,7 @@ add_library(planning
   src/time_scaler.cpp
 )
 
-target_include_directories(planning PUBLIC ./include)
+target_include_directories(planning PUBLIC ./include ../robot/include/)
 target_link_libraries(planning PUBLIC robot geometry)
 
 set(BUILD_TESTS True)

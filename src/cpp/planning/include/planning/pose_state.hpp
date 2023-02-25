@@ -1,13 +1,17 @@
 #include "planning/robot_state.hpp"
 #include <tuple>
 
-class PoseState: public RobotState {
+namespace planning {
 
-    public:
-        PoseState();
-        PoseState(std::vector<float>);
+    class PoseState: public RobotState {
 
-    private:
+        public:
+            PoseState();
+            PoseState(std::vector<float>);
 
+        private:
 
-};
+    };
+
+    PoseState random(Robot::Robot1*);
+}

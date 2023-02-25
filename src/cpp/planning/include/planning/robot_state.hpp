@@ -1,3 +1,4 @@
+#include "robots/robot.hpp"
 #include <vector>
 
 namespace planning {
@@ -6,7 +7,7 @@ namespace planning {
 
         public:
             RobotState();
-            virtual std::vector<float> configuration() = 0;
+            virtual std::vector<float> get_configuration() = 0;
         private:
 
         protected:

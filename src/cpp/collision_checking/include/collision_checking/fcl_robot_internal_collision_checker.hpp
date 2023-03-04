@@ -1,3 +1,6 @@
+#ifndef FCL_ROBOT_INTERNAL_COLLISION_CHECKER
+#define FCL_ROBOT_INTERNAL_COLLISION_CHECKER
+
 #include "collision_checking/robot_internal_collision_checker.hpp"
 #include "collision_checking/conversions.hpp"
 #include "transform/transform_tree.hpp"
@@ -32,3 +35,4 @@ class FCLRobotInternalCollisionChecker: public RobotInternalCollisionChecker {
         geometry::TransformTree* transform_tree;
         
 };
+#endif

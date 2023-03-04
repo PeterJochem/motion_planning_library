@@ -1,4 +1,5 @@
-
+#ifndef COLLISON_CHECKER
+#define COLLISON_CHECKER
 
 class CollisionChecker {
 
@@ -10,3 +11,4 @@ class CollisionChecker {
 
     private:
 };
+#endif

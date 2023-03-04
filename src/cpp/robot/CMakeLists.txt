@@ -5,6 +5,7 @@ add_library(robot
             src/UR5.cpp
             src/joint.cpp 
             src/link.cpp
+            src/utilities.cpp
             )
 
 #find_package(Geometry)

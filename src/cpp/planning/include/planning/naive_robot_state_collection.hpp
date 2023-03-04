@@ -1,9 +1,19 @@
 #include "planning/robot_state_collection.hpp"
+#include <map>
 
-class NaiveRobotStateCollection {
+namespace planning {
 
-    public:
-        NaiveRobotStateCollection();
-    private:
+    class NaiveRobotStateCollection: public RobotStateCollection {
 
-};
+        public:
+            NaiveRobotStateCollection();
+            void add_edge(RobotState*, RobotState*);
+            std::vector<RobotState*> get_states();
+            RobotState* nearest(RobotState*);
+            void insert(RobotState*);
+            int size();
+        private:
+            std::vector<RobotState*> robot_states;
+            std::map<RobotState*, std::vector<RobotState*>> edges;
+    };
+}

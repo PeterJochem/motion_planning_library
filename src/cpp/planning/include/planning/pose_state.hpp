@@ -8,9 +8,11 @@ namespace planning {
         public:
             PoseState();
             PoseState(std::vector<float>);
+            std::vector<float> get_configuration();
+            int dimension();
 
         private:
-
+            std::vector<float> configuration;
     };
 
     PoseState random(Robot::Robot1*);

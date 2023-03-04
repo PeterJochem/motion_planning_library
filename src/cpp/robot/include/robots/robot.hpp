@@ -18,7 +18,7 @@ class Robot1 {
         //  virtual std::vector<Transform&> transforms_in_order() = 0;
 
         
-        bool check_for_collision();
+        bool check_for_collision(std::vector<float>);
         bool is_current_state_in_collision();
         std::vector<float> random_joint_angles();
         // random_legal_joint_angles

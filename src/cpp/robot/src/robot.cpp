@@ -1,4 +1,5 @@
 #include "robots/robot.hpp"
+#include "robots/utilities.hpp"
 #include "conversions/conversions.hpp"
 #include <cassert>
 
@@ -6,6 +7,16 @@ namespace Robot {
 
 
     Robot1::Robot1() {
+    }
+
+    std::vector<float> Robot1::random_joint_angles() {
+
+        auto random_angles = std::vector<float>();
+        for (std::vector<Robot::Joint>::iterator itr = joints.begin(); itr != joints.end(); itr++) {
+            random_angles.push_back(utilities::random_in_interval(-1, 1));
+        }
+
+        return random_angles;
     }
 
     

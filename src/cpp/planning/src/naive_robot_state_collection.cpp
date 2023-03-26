@@ -10,28 +10,10 @@ namespace planning {
         return robot_states;
     }
 
-    void NaiveRobotStateCollection::add_edge(RobotState* state1, RobotState* state2) {
-
-        if (!state1 || !state2) {
-            throw std::runtime_error("One of the robot states is a nullptr. Cannot add edges between states.");
-        }
-
-        // check that state1 is in the collection
-        // check that state2 is in the collection
-
-        // Add edge from state1 -> state2
-        auto& state1_neighbors = edges[state1];
-        state1_neighbors.push_back(state2);
-
-        // Add edge from state2 -> state1
-        auto& state2_neighbors = edges[state2];
-        state1_neighbors.push_back(state1);
-    }
-
     RobotState* NaiveRobotStateCollection::nearest(RobotState* target_state) {
 
         if (robot_states.size() == 0) {
-            throw std::runtime_error("The naive robot state collection is empty. Cannot compute a nearet robot state.");
+            throw std::runtime_error("The naive robot state collection is empty. Cannot compute a nearest robot state.");
         }
 
         double min_distance = sum_square_errors(robot_states[0], target_state);

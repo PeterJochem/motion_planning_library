@@ -21,4 +21,69 @@ namespace planning {
         return error;
     }
 
+
+    std::vector<float> subtract(std::vector<float> lhs, std::vector<float> rhs) {
+
+        if (lhs.size() != rhs.size()) {
+            throw std::runtime_error("..");
+        }
+
+        std::vector<float> difference = std::vector<float>();
+        difference.reserve(lhs.size());
+        for (int i = 0; i < lhs.size(); i++) {
+            difference.push_back(lhs[i] - rhs[i]);
+        }
+
+        return difference;
+    }
+
+    std::vector<float> add(std::vector<float> lhs, std::vector<float> rhs) {
+
+        if (lhs.size() != rhs.size()) {
+            throw std::runtime_error("..");
+        }
+
+        std::vector<float> sum = std::vector<float>();
+        sum.reserve(lhs.size());
+        for (int i = 0; i < lhs.size(); i++) {
+            sum.push_back(lhs[i] + rhs[i]);
+        }
+
+        return sum;
+    }
+    
+    void multiply(std::vector<float>& configuration, float x) {
+
+        for (int i = 0; i < configuration.size(); i++) {
+            configuration[i] = configuration[i] * x;
+        }
+
+    }
+
+    void normalize(std::vector<float>& configuration) {
+
+        auto magnitude = 0.0;
+        for (int i = 0; i < configuration.size(); i++) {
+            magnitude += pow(configuration[i], 2);
+        }
+
+        magnitude = sqrt(magnitude);
+
+        for (int i = 0; i < configuration.size(); i++) {
+            configuration[i] = configuration[i] / magnitude;
+        }
+
+    }
+
+    void scale(std::vector<float>& configuration, float magnitude) {
+        
+        // Normalize
+        normalize(configuration);
+
+        // Set the length of the vector to be magnitude.
+        multiply(configuration, magnitude);
+    }
+
+
+
 }

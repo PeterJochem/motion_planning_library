@@ -22,12 +22,20 @@ CollisionObjectf* FCLRobotInternalCollisionChecker::create_collision_object(std:
 }
 
 bool FCLRobotInternalCollisionChecker::check() {
-    
-    auto links = robot.get_links();
 
     auto start = time(0);
 
+    // Need to update the trees transforms.
+    auto transforms = robot.get_ordered_transforms();
+    for (int i = 0; i < transforms.size(); i++) {
+        
+        auto transform = transforms[i];
+        transform_tree->set_transform(transform, transform.getPosition(), transform.getEulerAngles());
+    }
+
+
     // Update all the transforms for each collision object.
+    auto links = robot.get_links();
     for (int i = 0; i < links.size(); i++) {
 
         auto link_name = links[i].get_name();
@@ -57,8 +65,7 @@ bool FCLRobotInternalCollisionChecker::check() {
     }
 
     auto end = time(0);
-    std::cout << "Time spent checking: " << end - start << " seconds" << std::endl;
-
+    //std::cout << "Time spent checking: " << end - start << " seconds" << std::endl;
     return false;
 }
 

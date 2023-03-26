@@ -7,13 +7,11 @@ namespace planning {
 
         public:
             NaiveRobotStateCollection();
-            void add_edge(RobotState*, RobotState*);
             std::vector<RobotState*> get_states();
             RobotState* nearest(RobotState*);
             void insert(RobotState*);
             int size();
         private:
             std::vector<RobotState*> robot_states;
-            std::map<RobotState*, std::vector<RobotState*>> edges;
     };
 }

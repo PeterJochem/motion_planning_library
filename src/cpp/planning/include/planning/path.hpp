@@ -1,4 +1,7 @@
+#ifndef PATH
+#define PATH
 #include "planning/robot_state.hpp"
+#include "planning/joint_state.hpp"
 #include <vector>
 
 namespace planning {
@@ -7,11 +10,16 @@ namespace planning {
     class Path {
 
         public:
-            Path();
+            Path(std::vector<JointState>, std::vector<std::string>);
+            int size();
+            std::vector<JointState> get_robot_states();
+            std::vector<std::string> get_joint_names();
         protected:
-            std::vector<RobotState*> robot_states;
+            std::vector<JointState> robot_states;
+            std::vector<std::string> joint_names;
         private:
 
 
     };
 }
+#endif

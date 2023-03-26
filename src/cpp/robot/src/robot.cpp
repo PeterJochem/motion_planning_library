@@ -13,7 +13,7 @@ namespace Robot {
 
         auto random_angles = std::vector<float>();
         for (std::vector<Robot::Joint>::iterator itr = joints.begin(); itr != joints.end(); itr++) {
-            random_angles.push_back(utilities::random_in_interval(-1, 1));
+            random_angles.push_back(utilities::random_in_interval(itr->get_lower_limit(), itr->get_upper_limit()));
         }
 
         return random_angles;

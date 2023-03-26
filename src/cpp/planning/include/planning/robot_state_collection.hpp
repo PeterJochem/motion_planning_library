@@ -8,7 +8,6 @@ namespace planning {
     class RobotStateCollection {
 
         public:
-            virtual void add_edge(RobotState*, RobotState*) = 0;
             virtual std::vector<RobotState*> get_states() = 0;
             virtual RobotState* nearest(RobotState*) = 0;
             virtual void insert(RobotState*) = 0;

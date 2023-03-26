@@ -4,6 +4,8 @@
 #include "planning/robot_state_collection.hpp"
 #include "planning/path.hpp"
 #include "planning/planning_request.hpp"
+#include "planning/joint_state.hpp"
+
 
 namespace planning {
 
@@ -14,8 +16,7 @@ class RRTBase {
         RRTBase(Robot::Robot1*, PlanningRequest);
     
     protected:
-        RobotStateCollection* build_tree();
-        Path convert_tree_to_path(RobotStateCollection*);
+        Path* solve();
         PlanningRequest request;
         Robot::Robot1* robot;
 

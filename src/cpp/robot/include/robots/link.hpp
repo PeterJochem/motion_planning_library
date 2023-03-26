@@ -16,6 +16,8 @@ namespace Robot {
             geometry::VisualMesh get_visual_mesh();
             geometry::CollisionMesh get_collision_mesh();
             std::string get_name();
+            float get_lower_limit();
+            float get_upper_limit();
 
         private:
 
@@ -23,6 +25,8 @@ namespace Robot {
             geometry::SymbolicTransform define_symbolic_transform();
             geometry::VisualMesh visual_mesh;
             geometry::CollisionMesh collision_mesh;
+            float lower_limit;
+            float upper_limit;
 
 
     };

@@ -5,13 +5,7 @@ namespace Robot {
 
     Link::Link(geometry::Transform transform, geometry::VisualMesh visual_mesh, geometry::CollisionMesh collision_mesh): transform(transform), visual_mesh(visual_mesh), collision_mesh(collision_mesh) {
 
-        // mesh = 
-        std::cout << visual_mesh.get_file_name() << std::endl;
-    
     }
-
-    //geometry::Mesh Link::load_mesh() {
-    //}
 
     geometry::Transform* Link::get_transform() {
         return &transform;

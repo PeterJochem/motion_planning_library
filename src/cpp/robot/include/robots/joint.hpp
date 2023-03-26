@@ -11,13 +11,14 @@ namespace Robot {
     class Joint {
 
         public:
-            Joint(geometry::Transform, geometry::Axis);
+            Joint(geometry::Transform, geometry::Axis, float, float);
             geometry::Transform* get_transform();
             void apply_rotation(float radians);
             geometry::SymbolicTransform symbolic_transform();
             std::string name();
             GiNaC::symbol joint_symbol;
-            
+            float get_lower_limit();
+            float get_upper_limit();
 
         private:
             geometry::SymbolicTransform define_symbolic_transform();
@@ -25,6 +26,8 @@ namespace Robot {
             geometry::Transform transform;
             geometry::Axis axis;
             float angle;
+            float lower_limit;
+            float upper_limit;
     
     };
 }

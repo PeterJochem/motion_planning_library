@@ -135,42 +135,42 @@ namespace Robot {
 
         geometry::Transform transform = geometry::Transform("base_link", "base_shoulder_joint", 0., 0., 0.089159, 0., 0., 0.);
         geometry::Axis axis = geometry::Axis(geometry::Vector3D(0, 0, 1));
-        return Joint(transform, axis);
+        return Joint(transform, axis, -M_PI, M_PI);
     }
 
     Robot::Joint UR_5::define_shoulder_upper_arm_joint() {
 
         geometry::Transform transform = geometry::Transform("shoulder_link", "shoulder_upper_arm_joint", 0., 0.13585, 0., 0., M_PI/2, 0.);
         geometry::Axis axis = geometry::Axis(geometry::Vector3D(0, 1, 0));
-        return Joint(transform, axis);
+        return Joint(transform, axis, -M_PI, M_PI);
     }
     
     Robot::Joint UR_5::define_upper_arm_forearm_joint() {
 
         geometry::Transform transform = geometry::Transform("upper_arm_link", "upper_arm_forearm_joint", 0., -0.1197 + -0.001, 0.42500, 0., 0., 0.);
         geometry::Axis axis = geometry::Axis(geometry::Vector3D(0, 1, 0));
-        return Joint(transform, axis);
+        return Joint(transform, axis, -M_PI, M_PI);
     }
     
     Robot::Joint UR_5::define_forearm_wrist1_joint() {
 
         geometry::Transform transform = geometry::Transform("forearm_link", "forearm_wrist1_joint", 0., 0.001, 0.39225, 0., M_PI/2, 0.);
         geometry::Axis axis = geometry::Axis(geometry::Vector3D(0, 1, 0));
-        return Joint(transform, axis);
+        return Joint(transform, axis, -M_PI, M_PI);
     }
     
     Robot::Joint UR_5::define_wrist1_wrist2_joint() {
 
         geometry::Transform transform = geometry::Transform("wrist1_link", "wrist1_wrist2_joint", 0., 0.093, 0., 0., 0., 0.);
         geometry::Axis axis = geometry::Axis(geometry::Vector3D(0, 0, 1));
-        return Joint(transform, axis);
+        return Joint(transform, axis, -M_PI, M_PI);
     }
     
     Robot::Joint UR_5::define_wrist2_wrist3_joint() {
 
         geometry::Transform transform = geometry::Transform("wrist2_link", "wrist2_wrist3_joint", 0., 0.001, 0.09465, 0., 0., 0.);
         geometry::Axis axis = geometry::Axis(geometry::Vector3D(0, 1, 0));
-        return Joint(transform, axis);
+        return Joint(transform, axis, -M_PI, M_PI);
     }
 
     std::vector<Joint> UR_5::define_all_joints() {

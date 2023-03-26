@@ -8,10 +8,10 @@ class RRT: public RRTBase {
 
     public:
         RRT(Robot::Robot1* robot, PlanningRequest request);
-        RobotStateCollection* build_tree();
+        Path* solve();
 
     protected:
-
+        std::map<RobotState*, RobotState*> parent_lookup;
 
     private:
 

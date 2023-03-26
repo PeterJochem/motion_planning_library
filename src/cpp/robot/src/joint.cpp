@@ -3,7 +3,7 @@
 
 namespace Robot {
 
-    Joint::Joint(geometry::Transform transform, geometry::Axis axis): transform(transform), axis(axis) {
+    Joint::Joint(geometry::Transform transform, geometry::Axis axis, float lower_limit, float upper_limit): transform(transform), axis(axis), lower_limit(lower_limit), upper_limit(upper_limit) {
         zero_angle_transform = transform;
     }
 
@@ -65,8 +65,15 @@ namespace Robot {
             return geometry::SymbolicTransform(x, y, z, transform.get_roll(), transform.get_pitch(), R);
         }
         
-
         throw std::runtime_error("The axis must be a pure roll, pitch, or yaw.");
+    }
+
+    float Joint::get_lower_limit() {
+        return lower_limit;
+    }
+    
+    float Joint::get_upper_limit() {
+        return upper_limit;
     }
 
 }

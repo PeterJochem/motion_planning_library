@@ -19,10 +19,11 @@ add_library(planning
   src/utilities.cpp
   src/rrt_base.cpp
   src/rrt.cpp
+  src/state_space_sampler.cpp
 )
 
 target_include_directories(planning PUBLIC ./include ../robot/include/)
-target_link_libraries(planning PUBLIC robot geometry)
+target_link_libraries(planning PUBLIC robot geometry ros_conversions)
 
 set(BUILD_TESTS True)
 if (BUILD_TESTS)

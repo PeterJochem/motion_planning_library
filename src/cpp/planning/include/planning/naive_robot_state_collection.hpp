@@ -1,3 +1,5 @@
+#ifndef NAIVE_ROBOT_STATE_COLLECTION
+#define NAIVE_ROBOT_STATE_COLLECTION
 #include "planning/robot_state_collection.hpp"
 #include <map>
 
@@ -15,3 +17,4 @@ namespace planning {
             std::vector<RobotState*> robot_states;
     };
 }
+#endif

@@ -38,5 +38,4 @@ namespace planning {
     int NaiveRobotStateCollection::size() {
         return robot_states.size();
     }
-
 }

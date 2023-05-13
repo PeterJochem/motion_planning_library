@@ -30,6 +30,18 @@ namespace planning {
         return nearest;
     }
 
+    std::vector<RobotState*> NaiveRobotStateCollection::states_within_radius(RobotState* state, double radius)  {
+
+        if (robot_states.size() == 0) {
+            return {};
+        }
+        
+        std::vector<RobotState*> results;
+        std::copy_if(robot_states.begin(), robot_states.end(), std::back_inserter(results), [state, radius](auto other_state) {return sum_square_errors(state, other_state) < radius;});
+        return results;
+    }
+
+
     void NaiveRobotStateCollection::insert(RobotState* state) {
         robot_states.push_back(state);
     }

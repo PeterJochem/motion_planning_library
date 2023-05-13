@@ -11,6 +11,7 @@ namespace planning {
             NaiveRobotStateCollection();
             std::vector<RobotState*> get_states();
             RobotState* nearest(RobotState*);
+            std::vector<RobotState*> states_within_radius(RobotState*, double radius);
             void insert(RobotState*);
             int size();
         private:

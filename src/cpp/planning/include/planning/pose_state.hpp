@@ -10,6 +10,7 @@ namespace planning {
             PoseState(std::vector<float>);
             std::vector<float> get_configuration();
             int dimension();
+            float distance(RobotState*);
 
         private:
             std::vector<float> configuration;

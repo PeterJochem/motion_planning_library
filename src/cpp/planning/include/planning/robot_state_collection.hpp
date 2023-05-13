@@ -10,6 +10,7 @@ namespace planning {
         public:
             virtual std::vector<RobotState*> get_states() = 0;
             virtual RobotState* nearest(RobotState*) = 0;
+            virtual std::vector<RobotState*> states_within_radius(RobotState*, double radius) = 0;
             virtual void insert(RobotState*) = 0;
             virtual int size() = 0;
         

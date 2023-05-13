@@ -42,7 +42,7 @@ namespace planning {
             
                 // Check if we are done.
                 auto goal = *((JointState*)(request->getGoalState()));
-                if (new_state->distance(goal) < 0.75) {
+                if (new_state->distance(&goal) < 0.75) {
                     std::cout << "The RRT algorithm terminated." << std::endl;
                     parent_lookup[request->getGoalState()] = new_state;
                     break;
@@ -52,7 +52,7 @@ namespace planning {
             // Junk but useful for manual testing.
             auto goal = *((JointState*)(request->getGoalState()));
             auto tmp2 = robot_states->nearest(request->getGoalState());
-            auto distance = ((planning::JointState*)tmp2)->distance(goal);
+            auto distance = ((planning::JointState*)tmp2)->distance(&goal);
             std::cout << i << ": The nearest distance is " << distance << std::endl;
         }
 

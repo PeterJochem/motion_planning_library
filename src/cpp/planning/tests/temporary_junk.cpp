@@ -1,4 +1,5 @@
 #include "planning/rrt.hpp"
+#include "planning/rrt_star.hpp"
 #include "robots/UR5.hpp"
 #include "planning/joint_state.hpp"
 #include "visualizer/ROS_robot_visualizer.hpp"
@@ -21,7 +22,8 @@ int main(int argc, char** argv) {
     planning::RRTPlanningRequest planning_request = planning::RRTPlanningRequest(&start_state, &goal_state, 100, 0.1);
 
     // Solve the planning problem.
-    auto rrt = planning::RRT(robot, &planning_request);
+    //auto rrt = planning::RRT(robot, &planning_request);
+    auto rrt = planning::RRTStar(robot, &planning_request);
     auto path = rrt.solve();
     auto time_scaler = planning::NaiveTimeScaler(*path);
     auto trajectory = time_scaler.scale();

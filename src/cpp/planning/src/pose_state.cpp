@@ -18,4 +18,8 @@ namespace planning {
         return PoseState();
     }
 
+    float PoseState::distance(RobotState* other) {
+        return 0.0;
+    }
+
 }

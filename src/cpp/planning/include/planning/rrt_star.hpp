@@ -1,6 +1,8 @@
 #ifndef RRT_STAR
 #define RRT_STAR
 #include "planning/rrt_base.hpp"
+#include "planning/rrt_planning_request.hpp"
+
 
 
 namespace planning {
@@ -16,7 +18,7 @@ namespace planning {
 
         private:
             RRTPlanningRequest* request;
-    }
+    };
 }
 
 

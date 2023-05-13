@@ -13,7 +13,7 @@ namespace planning {
             std::vector<float> get_configuration();
             int dimension();
             bool is_legal(Robot::Robot1*, RobotInternalCollisionChecker*);
-            float distance(JointState&);
+            float distance(RobotState*);
             friend JointState operator+(JointState &lhs, JointState &rhs);
             friend JointState operator-(JointState &lhs, JointState &rhs);
             

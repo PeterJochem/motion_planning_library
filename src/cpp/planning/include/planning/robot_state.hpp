@@ -11,6 +11,7 @@ namespace planning {
             RobotState();
             virtual std::vector<float> get_configuration() = 0;
             virtual int dimension() = 0;
+            virtual float distance(RobotState*) = 0;
         private:
 
         protected:

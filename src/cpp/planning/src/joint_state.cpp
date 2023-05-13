@@ -68,15 +68,18 @@ namespace planning {
 
 
 
-    float JointState::distance(JointState& other) {
+    float JointState::distance(RobotState* other) {
         
-        if (dimension() != other.dimension()) {
+        if (dimension() != other->dimension()) {
+            // ...
+        }
+        else if (!dynamic_cast<JointState*>(other)) {
             // ...
         }
 
         float distance = 0.0;
         auto configuration = get_configuration();
-        auto other_configuration = other.get_configuration();
+        auto other_configuration = other->get_configuration();
         for (int i = 0; i < dimension(); i++) {
             distance += pow(configuration[i] - other_configuration[i], 2);
         }

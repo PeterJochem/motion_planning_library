@@ -11,8 +11,9 @@ namespace planning {
 
     Path* RRTStar::solve() {
 
-        // StatteSpaceSampler* state_space_sampler = new NaiveStateSpaceSampler(start state, goal state, ...);
-        robot_states->insert(request->getStartState());
+        auto initial_state = request->getStartState();
+        robot_states->insert(initial_state);
+        std::unordered_map<planning::RobotState*, double> costs = {{initial_state, 0.0}};
 
         for (int i = 0; i < request->max_num_states_in_graph; i++) {
             
@@ -34,25 +35,58 @@ namespace planning {
 
             new_state = new JointState( add(nearest->get_configuration(), delta_vector) );
 
+            // Compute the near states with some radius of the nearest node.
+            double radius = 1.0;
+            auto near_states = robot_states->states_within_radius(nearest, radius); 
+
+            // Find the parent for the new state.
+            auto x_min = nearest;
+            auto cost_min = costs[nearest] + nearest->distance(new_state);
+            for (std::vector<RobotState*>::iterator itr = near_states.begin(); itr != near_states.end(); itr++) {
+                
+                RobotState* neighbor  = *itr;
+                auto cost = costs[neighbor] + neighbor->distance(new_state);
+                if (cost < cost_min) {
+                    x_min = neighbor;
+                    cost_min = cost;
+                }
+            }
+
             // Insert the new state if it is legal.
             if (new_state->is_legal(robot, internal_collision_checker) ) {
 
                 robot_states->insert(new_state);
-                parent_lookup[new_state] = nearest;
-            
+                auto new_parent = x_min;
+                parent_lookup[new_state] = new_parent;
+                costs[new_state] = costs[new_parent] + new_parent->distance(new_state);
+
                 // Check if we are done.
                 auto goal = *((JointState*)(request->getGoalState()));
-                if (new_state->distance(goal) < 0.75) {
+                if (new_state->distance(&goal) < 0.75) {
                     std::cout << "The RRT algorithm terminated." << std::endl;
                     parent_lookup[request->getGoalState()] = new_state;
                     break;
                 }
             }
 
+            // Re-wire the tree.
+            for (std::vector<RobotState*>::iterator itr = near_states.begin(); itr != near_states.end(); itr++) {
+                
+                RobotState* near_state  = *itr;
+                auto cost = costs[near_state] + near_state->distance(new_state);
+
+                if (cost < costs[near_state]) {
+
+                    parent_lookup[near_state] = parent_lookup[new_state];
+                    costs[near_state] = cost;
+                }
+
+            }
+
             // Junk but useful for manual testing.
             auto goal = *((JointState*)(request->getGoalState()));
             auto tmp2 = robot_states->nearest(request->getGoalState());
-            auto distance = ((planning::JointState*)tmp2)->distance(goal);
+            auto distance = ((planning::JointState*)tmp2)->distance(&goal);
             std::cout << i << ": The nearest distance is " << distance << std::endl;
         }
 

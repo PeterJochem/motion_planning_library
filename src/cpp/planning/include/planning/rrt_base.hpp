@@ -22,7 +22,7 @@ namespace planning {
             Path* solve();
             Robot::Robot1* robot;
             geometry::StaticTransformTree* transform_tree;
-            FCLRobotInternalCollisionChecker* internal_collision_checker;
+            RobotInternalCollisionChecker* internal_collision_checker;
             RobotStateCollection* robot_states;
 
         private:

@@ -35,7 +35,7 @@ namespace planning {
             new_state = new JointState( add(nearest->get_configuration(), delta_vector) );
 
             // Insert the new state if it is legal.
-            if (new_state->is_legal(robot, *internal_collision_checker) ) {
+            if (new_state->is_legal(robot, internal_collision_checker) ) {
 
                 robot_states->insert(new_state);
                 parent_lookup[new_state] = nearest;

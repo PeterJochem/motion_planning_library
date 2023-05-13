@@ -14,6 +14,7 @@ add_library(planning
   src/pose_state.cpp 
   src/robot_state_collection.cpp
   src/time_scaler.cpp
+  src/naive_time_scaler.cpp
   src/naive_robot_state_collection.cpp
   src/planning_request.cpp
   src/utilities.cpp

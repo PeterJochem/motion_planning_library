@@ -4,6 +4,7 @@
 #include "visualizer/ROS_robot_visualizer.hpp"
 #include "visualizer/ROS_robot_trajectory_visualizer.hpp"
 #include "planning/trajectory.hpp"
+#include "planning/naive_time_scaler.hpp"
 #include "ros_conversions/ros_conversions.hpp"
 #include "trajectory_msgs/JointTrajectory.h"
 #include <unistd.h>
@@ -23,16 +24,8 @@ int main(int argc, char** argv) {
 
     auto rrt = planning::RRT(robot, &planning_request);
     auto path = rrt.solve();
-
-    // Temporary way to convert a path to a trajectory.
-    // auto time_scaler = NaiveTimeScaler();
-    // auto trajectory = time_scaler.scale(path); 
-    std::vector<float> schedule = std::vector<float>();
-    for (int i = 0; i < path->size(); i++){
-        schedule.push_back(i/2.0);
-    }
-
-    auto trajectory = planning::Trajectory(*path, schedule);
+    auto time_scaler = planning::NaiveTimeScaler(*path);
+    auto trajectory = time_scaler.scale();
 
     geometry::ROSRobotTrajectoryVisualizer trajectory_visualizer = geometry::ROSRobotTrajectoryVisualizer(robot, trajectory, "/trajectory", 0.1);
     trajectory_visualizer.visualize();

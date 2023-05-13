@@ -19,16 +19,11 @@ namespace planning {
         return configuration.size();
     }
 
-    bool JointState::is_legal(Robot::Robot1* robot, FCLRobotInternalCollisionChecker& checker) {
+    bool JointState::is_legal(Robot::Robot1* robot, RobotInternalCollisionChecker* checker) {
         
         // FIX ME - check that the joint angles are satisfied
-
-        // this checks the joint state that the robot is currently in
         robot->set_joint_angles(configuration);
-
-        bool has_internal_collision = checker.check();
-
-
+        bool has_internal_collision = checker->check();
         return !has_internal_collision;
     }
 

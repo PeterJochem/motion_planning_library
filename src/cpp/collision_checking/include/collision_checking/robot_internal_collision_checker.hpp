@@ -9,7 +9,7 @@ class RobotInternalCollisionChecker : public CollisionChecker {
 
     public:
         RobotInternalCollisionChecker();
-        bool check();
+        virtual bool check() = 0;
 
     private:
 };

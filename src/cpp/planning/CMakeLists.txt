@@ -23,6 +23,7 @@ add_library(planning
   src/state_space_sampler.cpp
   src/rrt_planning_request.cpp
   src/rrt_star.cpp
+  src/rrt_connect.cpp
 )
 
 target_include_directories(planning PUBLIC ./include ../robot/include/)

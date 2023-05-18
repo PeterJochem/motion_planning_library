@@ -18,9 +18,9 @@ int main(int argc, char** argv) {
 
     // Specify the planning problem.
     Robot::Robot1* robot = new Robot::UR_5();
-    auto start_state = planning::JointState({1.0, 0., 0.0, 0., 0., 0.});
-    auto goal_state = planning::JointState({0., 0.2, 0., 0., 0, 0.});
-    planning::RRTPlanningRequest planning_request = planning::RRTPlanningRequest(&start_state, &goal_state, 100, 0.1);
+    auto start_state = planning::JointState({1.0, 0., 0.0, 0.2, 0.1, 0.});
+    auto goal_state = planning::JointState({0., 0., 0., 0., 0, 0.});
+    planning::RRTPlanningRequest planning_request = planning::RRTPlanningRequest(&start_state, &goal_state, 100000, 0.1);
 
     // Solve the planning problem.
     //auto rrt = planning::RRT(robot, &planning_request);

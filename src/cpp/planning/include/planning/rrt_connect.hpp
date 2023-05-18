@@ -2,6 +2,7 @@
 #define RRT_CONNECT
 #include "planning/rrt_base.hpp"
 #include "planning/rrt_planning_request.hpp"
+#include <bits/stdc++.h>
 
 
 namespace planning {
